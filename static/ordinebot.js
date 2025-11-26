@@ -46,7 +46,7 @@ async function sendMessage() {
     addBotMessage("Scriu răspunsul...");
 
     try {
-        const response = await fetch("https://gemeni-chat.onrender.com/ask", {
+        const response = await fetch("https://gemenichat.onrender.com/ask", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ query: msg })
