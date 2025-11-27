@@ -9,7 +9,7 @@ let pgConversation = [];
 function linkify(text) {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.replace(urlRegex, url => {
-        return `<a href="${url}" target="_blank" class="ai-link">${url}</a>`;
+        return `<a href="${url}" class="ai-link">${url}</a>`;
     });
 }
 
