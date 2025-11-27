@@ -14,15 +14,18 @@ function linkify(text) {
 }
 
 /* ======================================================
-   DESCHIDE / INCHIDE FEREASTRA
+   DESCHIDE / INCHIDE FEREASTRA - VARIANTA FINALA (.open)
 ====================================================== */
 function toggleChat() {
     const chat = document.getElementById('ai-chat-box');
     if (!chat) return;
 
-    chat.style.display = (chat.style.display === 'block') ? 'none' : 'block';
+    chat.classList.toggle("open");
     scrollMessages();
 }
+
+// ***** FIX ***** — EXPUNEM GLOBAL
+window.toggleChat = toggleChat;
 
 /* ======================================================
    SCROLL
@@ -71,7 +74,7 @@ function addBotMessage(msg) {
 }
 
 /* ======================================================
-   ARATA ANIMATIA DE TYPING
+   ANIMATIA DE TYPING
 ====================================================== */
 function showTyping() {
     const typingBox = document.getElementById("ai-typing");
@@ -125,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("ai-chat-input");
     const sendBtn = document.getElementById("ai-chat-send");
 
-    /*  Restaurăm conversația salvată */
+    /*  Restaurăm conversația */
     const saved = sessionStorage.getItem("GemeniBotHistory");
     if (saved && messagesBox) {
         messagesBox.innerHTML = saved;
@@ -141,12 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (bubble) bubble.onclick = toggleChat;
-
-    if (sendBtn) {
-        sendBtn.addEventListener("click", () => {
-            sendMessage();
-        });
-    }
+    if (sendBtn) sendBtn.onclick = sendMessage;
 
     if (input) {
         input.addEventListener("keydown", ev => {
@@ -154,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
 
 
 
