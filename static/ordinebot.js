@@ -24,7 +24,7 @@ function toggleChat() {
     scrollMessages();
 }
 
-// ***** FIX ***** — EXPUNEM GLOBAL
+// expunem global pentru HTML
 window.toggleChat = toggleChat;
 
 /* ======================================================
@@ -60,7 +60,7 @@ function addUserMessage(msg) {
 }
 
 /* ======================================================
-   ADAUGĂ MESAJ BOT (CU HTML + LINKURI)
+   ADAUGĂ MESAJ BOT
 ====================================================== */
 function addBotMessage(msg) {
     const box = document.getElementById('ai-chat-messages');
@@ -85,6 +85,20 @@ function showTyping() {
 function hideTyping() {
     const typingBox = document.getElementById("ai-typing");
     typingBox.style.display = "none";
+}
+
+/* ======================================================
+   AUTO DESCHIDERE DUPA 5 SECUNDE LA PRIMA VIZITA
+====================================================== */
+function autoOpenChat() {
+    // dacă deja a fost deschis automat, nu mai deschidem din nou
+    if (sessionStorage.getItem("GemeniBotAutoOpened")) return;
+
+    setTimeout(() => {
+        toggleChat();
+        addBotMessage("Bună! Sunt GemeniBot 💗 Cu ce pot să te ajut astăzi?");
+        sessionStorage.setItem("GemeniBotAutoOpened", "1");
+    }, 5000);
 }
 
 /* ======================================================
@@ -128,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = document.getElementById("ai-chat-input");
     const sendBtn = document.getElementById("ai-chat-send");
 
-    /*  Restaurăm conversația */
+    /* Restaurăm conversația */
     const saved = sessionStorage.getItem("GemeniBotHistory");
     if (saved && messagesBox) {
         messagesBox.innerHTML = saved;
@@ -151,7 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (ev.key === "Enter") sendMessage();
         });
     }
+
+    // auto-open
+    autoOpenChat();
 });
+
 
 
 
