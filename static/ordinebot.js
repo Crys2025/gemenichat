@@ -3,48 +3,90 @@ console.log("GemeniBot JS loaded");
 let openedAutomatically = false;
 let pgConversation = [];
 
-// deschide/închide fereastra
+/* ======================================================
+   FUNCTIE LINKIFY - transforma linkurile in <a>
+====================================================== */
+function linkify(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, url => {
+        return `<a href="${url}" target="_blank" class="ai-link">${url}</a>`;
+    });
+}
+
+/* ======================================================
+   DESCHIDE / INCHIDE FEREASTRA
+====================================================== */
 function toggleChat() {
     const chat = document.getElementById('ai-chat-box');
     if (!chat) return;
+
     chat.style.display = (chat.style.display === 'block') ? 'none' : 'block';
+    scrollMessages();
 }
 
-// scroll la ultimul mesaj
+/* ======================================================
+   SCROLL
+====================================================== */
 function scrollMessages() {
     const box = document.getElementById('ai-chat-messages');
     if (!box) return;
     box.scrollTop = box.scrollHeight;
 }
 
-// salvăm conversația (HTML) în sessionStorage
+/* ======================================================
+   SALVARE CONVERSATIE
+====================================================== */
 function saveChat() {
     const box = document.getElementById("ai-chat-messages");
     if (!box) return;
-    sessionStorage.setItem("ordineChatHistory", box.innerHTML);
+    sessionStorage.setItem("GemeniBotHistory", box.innerHTML);
 }
 
-// adaugă mesaj de la user
+/* ======================================================
+   ADAUGĂ MESAJ USER
+====================================================== */
 function addUserMessage(msg) {
     const box = document.getElementById('ai-chat-messages');
     if (!box) return;
+
     box.innerHTML += `<div class="user-msg">${msg}</div>`;
     pgConversation.push({ role: "user", content: msg });
+
     scrollMessages();
     saveChat();
 }
 
-// adaugă mesaj de la bot (permite HTML – linkuri etc.)
+/* ======================================================
+   ADAUGĂ MESAJ BOT (CU HTML + LINKURI)
+====================================================== */
 function addBotMessage(msg) {
     const box = document.getElementById('ai-chat-messages');
     if (!box) return;
-    box.innerHTML += `<div class="bot-msg">${msg}</div>`;
+
+    box.innerHTML += `<div class="bot-msg">${linkify(msg)}</div>`;
     pgConversation.push({ role: "assistant", content: msg });
+
     scrollMessages();
     saveChat();
 }
 
-// trimite mesajul la backend
+/* ======================================================
+   ARATA ANIMATIA DE TYPING
+====================================================== */
+function showTyping() {
+    const typingBox = document.getElementById("ai-typing");
+    typingBox.style.display = "flex";
+    scrollMessages();
+}
+
+function hideTyping() {
+    const typingBox = document.getElementById("ai-typing");
+    typingBox.style.display = "none";
+}
+
+/* ======================================================
+   TRIMITE MESAJ
+====================================================== */
 async function sendMessage() {
     const input = document.getElementById('ai-chat-input');
     if (!input) return;
@@ -55,8 +97,7 @@ async function sendMessage() {
     addUserMessage(msg);
     input.value = "";
 
-    // mesaj temporar "Scriu răspunsul..."
-    addBotMessage("Scriu răspunsul...");
+    showTyping();
 
     try {
         const response = await fetch("https://gemenichat.onrender.com/ask", {
@@ -66,29 +107,26 @@ async function sendMessage() {
         });
 
         const data = await response.json();
-
-        // ștergem "Scriu răspunsul..."
-        const temp = document.querySelector(".bot-msg:last-child");
-        if (temp) temp.remove();
-
+        hideTyping();
         addBotMessage(data.answer);
 
     } catch (err) {
-        const temp = document.querySelector(".bot-msg:last-child");
-        if (temp) temp.remove();
-
-        addBotMessage("❌ Serverul nu răspunde. Mai încearcă puțin.");
+        hideTyping();
+        addBotMessage("❌ Serverul nu răspunde acum. Încearcă din nou.");
     }
 }
 
-// inițializare la încărcarea paginii
+/* ======================================================
+   INITIALIZARE
+====================================================== */
 document.addEventListener("DOMContentLoaded", () => {
     const messagesBox = document.getElementById("ai-chat-messages");
     const bubble = document.getElementById("ai-bot-bubble");
     const input = document.getElementById("ai-chat-input");
+    const sendBtn = document.getElementById("ai-chat-send");
 
-    // 🔥 Restaurăm conversația salvată și reconstruim memoria
-    const saved = sessionStorage.getItem("ordineChatHistory");
+    /*  Restaurăm conversația salvată */
+    const saved = sessionStorage.getItem("GemeniBotHistory");
     if (saved && messagesBox) {
         messagesBox.innerHTML = saved;
 
@@ -102,8 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollMessages();
     }
 
-    if (bubble) {
-        bubble.onclick = toggleChat;
+    if (bubble) bubble.onclick = toggleChat;
+
+    if (sendBtn) {
+        sendBtn.addEventListener("click", () => {
+            sendMessage();
+        });
     }
 
     if (input) {
@@ -112,6 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
 
 
 
